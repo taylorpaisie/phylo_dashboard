@@ -3,7 +3,8 @@ dash-bio
 dash-bootstrap-components
 pandas
 plotly
-matplotlib
-dash-cytoscape
 gunicorn
 openpyxl
+folium
+geopy
+python-dotenv
