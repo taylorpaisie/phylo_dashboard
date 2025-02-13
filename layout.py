@@ -11,7 +11,7 @@ app_layout = dbc.Container([
     ),
     dcc.Tabs([
         # Tab for Phylogenetic Tree Visualization
-        dcc.Tab(label='Phylogenetic Tree', children=[
+        dcc.Tab(label='Phylogenetic Tree Visualization', children=[
             dbc.Container([
                 dbc.Row([
                     dbc.Col(html.H5("Upload a Newick Tree File, Metadata File, and GeoJSON for Map", className="text-center", style={'color': 'white'}))
@@ -36,34 +36,34 @@ app_layout = dbc.Container([
                                    'textAlign': 'center', 'margin': '10px'},
                             multiple=False
                         ),
-                        dcc.Upload(
-                            id='upload-geojson',
-                            children=dbc.Button("Select GeoJSON File", color="primary", className="mt-2"),
-                            style={'width': '100%', 'height': '60px', 'lineHeight': '60px',
-                                   'borderWidth': '1px', 'borderStyle': 'dashed', 'borderRadius': '5px',
-                                   'textAlign': 'center', 'margin': '10px'},
-                            multiple=False
-                        ),
-                        html.Br(),
+                        # dcc.Upload(
+                        #     id='upload-geojson',
+                        #     children=dbc.Button("Select GeoJSON File", color="primary", className="mt-2"),
+                        #     style={'width': '100%', 'height': '60px', 'lineHeight': '60px',
+                        #            'borderWidth': '1px', 'borderStyle': 'dashed', 'borderRadius': '5px',
+                        #            'textAlign': 'center', 'margin': '10px'},
+                        #     multiple=False
+                        # ),
+                        # html.Br(),
 
-                        # ✅ New: City Name Input
-                        html.Label("Enter a City Name:"),
-                        dcc.Input(id="map-city", type="text", placeholder="e.g., New York", className="mb-2"),
+                        # # ✅ New: City Name Input
+                        # html.Label("Enter a City Name:"),
+                        # dcc.Input(id="map-city", type="text", placeholder="e.g., New York", className="mb-2"),
                         
-                        html.Label("Latitude:"),
-                        dcc.Input(id="map-lat", type="number", value=33, step=0.0001, className="mb-2"),
-                        html.Label("Longitude:"),
-                        dcc.Input(id="map-lon", type="number", value=-83, step=0.0001, className="mb-2"),
-                        html.Label("Zoom Level:"),
-                        dcc.Slider(
-                            id="map-zoom",
-                            min=1, 
-                            max=18, 
-                            step=1, 
-                            value=7,  
-                            marks={i: str(i) for i in range(5, 21, 3)}
-                        ),
-                        html.Br(),
+                        # html.Label("Latitude:"),
+                        # dcc.Input(id="map-lat", type="number", value=33, step=0.0001, className="mb-2"),
+                        # html.Label("Longitude:"),
+                        # dcc.Input(id="map-lon", type="number", value=-83, step=0.0001, className="mb-2"),
+                        # html.Label("Zoom Level:"),
+                        # dcc.Slider(
+                        #     id="map-zoom",
+                        #     min=1, 
+                        #     max=18, 
+                        #     step=1, 
+                        #     value=7,  
+                        #     marks={i: str(i) for i in range(5, 21, 3)}
+                        # ),
+                        # html.Br(),
                         # ✅ Tip Label Toggle
                         dcc.Checklist(
                             id='show-tip-labels',
@@ -71,41 +71,41 @@ app_layout = dbc.Container([
                             value=[],  
                             style={"marginTop": "10px"}
                         ),
-                        html.Br(),
-                        html.H5("Add Custom Marker", className="text-center mt-4", style={'color': 'white'}),
-                        dbc.Row([
-                            dbc.Col([
-                                html.Label("Marker Name:"),
-                                dcc.Input(id="marker-name", type="text", placeholder="Enter marker name", className="mb-2"),
-                            ], width=3),
-                            dbc.Col([
-                                html.Label("Latitude:"),
-                                dcc.Input(id="marker-lat", type="number", placeholder="Enter latitude", className="mb-2"),
-                            ], width=3),
-                            dbc.Col([
-                                html.Label("Longitude:"),
-                                dcc.Input(id="marker-lon", type="number", placeholder="Enter longitude", className="mb-2"),
-                            ], width=3),
-                            dbc.Col([
-                                dbc.Button("Add Marker", id="add-marker-btn", color="success", className="mt-4"),
-                            ], width=3),
-                        ]),
+                        # html.Br(),
+                        # html.H5("Add Custom Marker", className="text-center mt-4", style={'color': 'white'}),
+                        # dbc.Row([
+                        #     dbc.Col([
+                        #         html.Label("Marker Name:"),
+                        #         dcc.Input(id="marker-name", type="text", placeholder="Enter marker name", className="mb-2"),
+                        #     ], width=3),
+                        #     dbc.Col([
+                        #         html.Label("Latitude:"),
+                        #         dcc.Input(id="marker-lat", type="number", placeholder="Enter latitude", className="mb-2"),
+                        #     ], width=3),
+                        #     dbc.Col([
+                        #         html.Label("Longitude:"),
+                        #         dcc.Input(id="marker-lon", type="number", placeholder="Enter longitude", className="mb-2"),
+                        #     ], width=3),
+                        #     dbc.Col([
+                        #         dbc.Button("Add Marker", id="add-marker-btn", color="success", className="mt-4"),
+                        #     ], width=3),
+                        # ]),
                         html.Br(),
                     ], width=12)
                 ]),
 
-                html.Hr(),  # Horizontal Line
+                # html.Hr(),  # Horizontal Line
 
                 # Row for Phylogenetic Tree and Map
                 dbc.Row([
-                    dbc.Col(html.Div(id='tree-graph-container'), width=6),  # Tree on the Left (50%)
-                    dbc.Col(html.Div(id='phylo-map-container'), width=6),  # Map on the Right (50%)
+                    dbc.Col(html.Div(id='tree-graph-container'), width=12)  # Tree on the Left (50%)
+                    # dbc.Col(html.Div(id='phylo-map-container'), width=6),  # Map on the Right (50%)
                 ])
             ])
         ]),
 
         # Tab for Standalone Map
-        dcc.Tab(label='Map Viewer', children=[
+        dcc.Tab(label='Map Visualization', children=[
             dbc.Container([
                 dbc.Row([
                     dbc.Col(html.H5("Upload GeoJSON or Search for a Location", className="text-center", style={'color': 'white'}))
@@ -165,6 +165,99 @@ app_layout = dbc.Container([
                 ])
             ])
         ]),
+
+        dcc.Tab(label='Phylogenetic Tree and Map Visualization', children=[
+            dbc.Container([
+                dbc.Row([
+                    dbc.Col(html.H5("Upload a Newick Tree File, Metadata File, and GeoJSON for Map", className="text-center", style={'color': 'white'}))
+                ]),
+
+                # Upload Section
+                dbc.Row([
+                    dbc.Col([
+                        dcc.Upload(
+                            id='upload-tree-2',  # Changed ID
+                            children=dbc.Button("Select Tree File", color="primary", className="mt-2"),
+                            style={'width': '100%', 'height': '60px', 'lineHeight': '60px',
+                                'borderWidth': '1px', 'borderStyle': 'dashed', 'borderRadius': '5px',
+                                'textAlign': 'center', 'margin': '10px'},
+                            multiple=False
+                        ),
+                        dcc.Upload(
+                            id='upload-metadata-2',
+                            children=dbc.Button("Select Metadata File", color="primary", className="mt-2"),
+                            style={'width': '100%', 'height': '60px', 'lineHeight': '60px',
+                                   'borderWidth': '1px', 'borderStyle': 'dashed', 'borderRadius': '5px',
+                                   'textAlign': 'center', 'margin': '10px'},
+                            multiple=False
+                        ),
+                        dcc.Upload(
+                            id='upload-geojson',
+                            children=dbc.Button("Select GeoJSON File", color="primary", className="mt-2"),
+                            style={'width': '100%', 'height': '60px', 'lineHeight': '60px',
+                                   'borderWidth': '1px', 'borderStyle': 'dashed', 'borderRadius': '5px',
+                                   'textAlign': 'center', 'margin': '10px'},
+                            multiple=False
+                        ),
+                        html.Br(),
+
+                        # ✅ New: City Name Input
+                        html.Label("Enter a City Name:"),
+                        dcc.Input(id="map-city", type="text", placeholder="e.g., New York", className="mb-2"),
+                        
+                        html.Label("Latitude:"),
+                        dcc.Input(id="map-lat", type="number", value=33, step=0.0001, className="mb-2"),
+                        html.Label("Longitude:"),
+                        dcc.Input(id="map-lon", type="number", value=-83, step=0.0001, className="mb-2"),
+                        html.Label("Zoom Level:"),
+                        dcc.Slider(
+                            id="map-zoom",
+                            min=1, 
+                            max=18, 
+                            step=1, 
+                            value=7,  
+                            marks={i: str(i) for i in range(5, 21, 3)}
+                        ),
+                        html.Br(),
+                        html.H5("Add Custom Marker", className="text-center mt-4", style={'color': 'white'}),
+                        dbc.Row([
+                            dbc.Col([
+                                html.Label("Marker Name:"),
+                                dcc.Input(id="marker-name", type="text", placeholder="Enter marker name", className="mb-2"),
+                            ], width=3),
+                            dbc.Col([
+                                html.Label("Latitude:"),
+                                dcc.Input(id="marker-lat", type="number", placeholder="Enter latitude", className="mb-2"),
+                            ], width=3),
+                            dbc.Col([
+                                html.Label("Longitude:"),
+                                dcc.Input(id="marker-lon", type="number", placeholder="Enter longitude", className="mb-2"),
+                            ], width=3),
+                            dbc.Col([
+                                dbc.Button("Add Marker", id="add-marker-btn", color="success", className="mt-4"),
+                            ], width=3),
+                        ]),
+                        html.Br(),
+                        # ✅ Tip Label Toggle
+                        dcc.Checklist(
+                            id='show-tip-labels-2',
+                            options=[{'label': 'Show Tip Labels', 'value': 'SHOW'}],
+                            value=[],  
+                            style={"marginTop": "10px"}
+                        ),
+                    ], width=12)
+                ]),
+
+                html.Hr(),  # Horizontal Line
+
+                # Row for Phylogenetic Tree and Map
+                dbc.Row([
+                    dbc.Col(html.Div(id='tree-graph-container-2'), width=6),  # Tree on the Left (50%)
+                    dbc.Col(html.Div(id='phylo-map-container'), width=6),  # Map on the Right (50%)
+                ])
+            ])
+        ]),
+
     ],
     colors={
         "border": "black",      # ✅ Make tab borders black

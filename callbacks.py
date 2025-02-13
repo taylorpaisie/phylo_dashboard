@@ -214,36 +214,71 @@ def register_callbacks(app):
     @app.callback(
         Output('tree-graph-container', 'children'),
         [Input('upload-tree', 'contents'),
-         Input('upload-metadata', 'contents'),
-         Input('show-tip-labels', 'value')],
+        Input('upload-metadata', 'contents'),
+        Input('show-tip-labels', 'value')],
         [State('upload-tree', 'filename'),
-         State('upload-metadata', 'filename')]
+        State('upload-metadata', 'filename')]
     )
-    def update_tree(tree_contents, metadata_contents, show_labels, tree_filename, metadata_filename):
-        if tree_contents and metadata_contents:
-            try:
-                # Decode tree and metadata files
-                tree_data = base64.b64decode(tree_contents.split(",", 1)[1]).decode("utf-8")
-                metadata_data = base64.b64decode(metadata_contents.split(",", 1)[1]).decode("utf-8")
-                tree_file = "uploaded_tree.tree"
-                metadata_file = "uploaded_metadata.tsv"
+    def update_tree_tab1(tree_contents, metadata_contents, show_labels, tree_filename, metadata_filename):
+        if not tree_contents or not metadata_contents:
+            return html.Div("Please upload both a tree file and a metadata file.", className="text-warning")
 
-                with open(tree_file, "w") as f:
-                    f.write(tree_data)
+        try:
+            # Decode tree and metadata
+            tree_data = base64.b64decode(tree_contents.split(",", 1)[1]).decode("utf-8")
+            metadata_data = base64.b64decode(metadata_contents.split(",", 1)[1]).decode("utf-8")
+            
+            # Save files
+            tree_file = "tree_tab1.tree"
+            metadata_file = "metadata_tab1.tsv"
+            with open(tree_file, "w") as f:
+                f.write(tree_data)
+            with open(metadata_file, "w") as f:
+                f.write(metadata_data)
 
-                with open(metadata_file, "w") as f:
-                    f.write(metadata_data)
+            # Generate tree visualization
+            show_tip_labels = 'SHOW' in show_labels
+            fig = create_tree_plot(tree_file, metadata_file, show_tip_labels)
+            
+            return dcc.Graph(figure=fig)
 
-                # Determine if tip labels should be shown
-                show_tip_labels = 'SHOW' in show_labels
+        except Exception as e:
+            return html.Div(f"Error processing tree file: {str(e)}", className="text-danger")
 
-                # Generate the tree plot with `create_tree_plot`
-                fig = create_tree_plot(tree_file, metadata_file, show_tip_labels)
-                return dcc.Graph(figure=fig)
 
-            except Exception as e:
-                return html.Div(f"Error processing tree file: {str(e)}", className="text-danger")
-        return html.Div("Please upload both a tree file and a metadata file.", className="text-warning")
+    @app.callback(
+        Output('tree-graph-container-2', 'children'),
+        [Input('upload-tree-2', 'contents'),
+        Input('upload-metadata-2', 'contents'),
+        Input('show-tip-labels-2', 'value')],
+        [State('upload-tree-2', 'filename'),
+        State('upload-metadata-2', 'filename')]
+    )
+    def update_tree_tab2(tree_contents, metadata_contents, show_labels, tree_filename, metadata_filename):
+        if not tree_contents or not metadata_contents:
+            return html.Div("Please upload both a tree file and a metadata file.", className="text-warning")
+
+        try:
+            # Decode tree and metadata
+            tree_data = base64.b64decode(tree_contents.split(",", 1)[1]).decode("utf-8")
+            metadata_data = base64.b64decode(metadata_contents.split(",", 1)[1]).decode("utf-8")
+
+            # Save files
+            tree_file = "tree_tab2.tree"
+            metadata_file = "metadata_tab2.tsv"
+            with open(tree_file, "w") as f:
+                f.write(tree_data)
+            with open(metadata_file, "w") as f:
+                f.write(metadata_data)
+
+            # Generate tree visualization
+            show_tip_labels = 'SHOW' in show_labels
+            fig = create_tree_plot(tree_file, metadata_file, show_tip_labels)
+            
+            return dcc.Graph(figure=fig)
+
+        except Exception as e:
+            return html.Div(f"Error processing tree file: {str(e)}", className="text-danger")
 
     # Callback for Folium Map Display
 
