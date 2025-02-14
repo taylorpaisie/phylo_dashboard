@@ -7,7 +7,7 @@ def generate_folium_map(geojson_data=None, latitude=40.650002, longitude=-73.949
     attr = ('&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> '
             'contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>')
     
-    m = folium.Map(location=[latitude, longitude], zoom_start=zoom, tiles="OpenStreetMap", attr=attr)
+    m = folium.Map(location=[latitude, longitude], zoom_start=zoom, tiles="CartoDB positron", attr=attr)
 
     # ✅ Add GeoJSON layer if provided
     if geojson_data:

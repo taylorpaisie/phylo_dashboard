@@ -36,34 +36,6 @@ app_layout = dbc.Container([
                                    'textAlign': 'center', 'margin': '10px'},
                             multiple=False
                         ),
-                        # dcc.Upload(
-                        #     id='upload-geojson',
-                        #     children=dbc.Button("Select GeoJSON File", color="primary", className="mt-2"),
-                        #     style={'width': '100%', 'height': '60px', 'lineHeight': '60px',
-                        #            'borderWidth': '1px', 'borderStyle': 'dashed', 'borderRadius': '5px',
-                        #            'textAlign': 'center', 'margin': '10px'},
-                        #     multiple=False
-                        # ),
-                        # html.Br(),
-
-                        # # ✅ New: City Name Input
-                        # html.Label("Enter a City Name:"),
-                        # dcc.Input(id="map-city", type="text", placeholder="e.g., New York", className="mb-2"),
-                        
-                        # html.Label("Latitude:"),
-                        # dcc.Input(id="map-lat", type="number", value=33, step=0.0001, className="mb-2"),
-                        # html.Label("Longitude:"),
-                        # dcc.Input(id="map-lon", type="number", value=-83, step=0.0001, className="mb-2"),
-                        # html.Label("Zoom Level:"),
-                        # dcc.Slider(
-                        #     id="map-zoom",
-                        #     min=1, 
-                        #     max=18, 
-                        #     step=1, 
-                        #     value=7,  
-                        #     marks={i: str(i) for i in range(5, 21, 3)}
-                        # ),
-                        # html.Br(),
                         # ✅ Tip Label Toggle
                         dcc.Checklist(
                             id='show-tip-labels',
@@ -71,25 +43,6 @@ app_layout = dbc.Container([
                             value=[],  
                             style={"marginTop": "10px"}
                         ),
-                        # html.Br(),
-                        # html.H5("Add Custom Marker", className="text-center mt-4", style={'color': 'white'}),
-                        # dbc.Row([
-                        #     dbc.Col([
-                        #         html.Label("Marker Name:"),
-                        #         dcc.Input(id="marker-name", type="text", placeholder="Enter marker name", className="mb-2"),
-                        #     ], width=3),
-                        #     dbc.Col([
-                        #         html.Label("Latitude:"),
-                        #         dcc.Input(id="marker-lat", type="number", placeholder="Enter latitude", className="mb-2"),
-                        #     ], width=3),
-                        #     dbc.Col([
-                        #         html.Label("Longitude:"),
-                        #         dcc.Input(id="marker-lon", type="number", placeholder="Enter longitude", className="mb-2"),
-                        #     ], width=3),
-                        #     dbc.Col([
-                        #         dbc.Button("Add Marker", id="add-marker-btn", color="success", className="mt-4"),
-                        #     ], width=3),
-                        # ]),
                         html.Br(),
                     ], width=12)
                 ]),
@@ -141,6 +94,27 @@ app_layout = dbc.Container([
                 ]),
 
                 html.Hr(),
+
+                # Add Custom Marker UI
+                html.H5("Add Custom Marker", className="text-center mt-4", style={'color': 'white'}),
+                dbc.Row([
+                    dbc.Col([
+                        html.Label("Marker Name:"),
+                        dcc.Input(id="standalone-marker-name", type="text", placeholder="Enter marker name", className="mb-2"),
+                    ], width=3),
+                    dbc.Col([
+                        html.Label("Latitude:"),
+                        dcc.Input(id="standalone-marker-lat", type="number", placeholder="Enter latitude", className="mb-2"),
+                    ], width=3),
+                    dbc.Col([
+                        html.Label("Longitude:"),
+                        dcc.Input(id="standalone-marker-lon", type="number", placeholder="Enter longitude", className="mb-2"),
+                    ], width=3),
+                    dbc.Col([
+                        dbc.Button("Add Marker", id="standalone-add-marker-btn", color="success", className="mt-4"),
+                    ], width=3),
+                ]),
+                html.Br(),
 
                 # ✅ Zoom Slider
                 dbc.Row([

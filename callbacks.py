@@ -41,6 +41,7 @@ print(f"Loaded API Key: {os.getenv('OPENCAGE_API_KEY')}")
 
 # Store Markers in Memory
 MARKERS = []
+STANDALONE_MARKERS = []
 
 def get_city_coordinates(city_name):
     """Fetch city coordinates using OpenCage API."""
@@ -331,16 +332,22 @@ def register_callbacks(app):
         Output('standalone-map-container', 'children'),
         [Input('upload-standalone-geojson', 'contents'),
         Input('search-standalone-city-btn', 'n_clicks'),
-        Input('standalone-map-zoom', 'value')],  # ✅ New Zoom Input
+        Input('standalone-map-zoom', 'value'),
+        Input('standalone-add-marker-btn', 'n_clicks')],  # Add marker button
         [State('upload-standalone-geojson', 'filename'),
-        State('search-standalone-city', 'value')]
+        State('search-standalone-city', 'value'),
+        State('standalone-marker-name', 'value'),
+        State('standalone-marker-lat', 'value'),
+        State('standalone-marker-lon', 'value')]
     )
-    def update_standalone_map(geojson_contents, n_clicks, zoom, filename, city_name):
-        """Update Standalone Folium map based on GeoJSON upload, city search, and zoom level."""
+    def update_standalone_map(geojson_contents, n_clicks, zoom, marker_clicks, filename, city_name, marker_name, marker_lat, marker_lon):
+        """Update Standalone Folium map based on GeoJSON upload, city search, and markers."""
         
-        latitude, longitude, error_msg = 40.650002, -73.949997, None  # Default location
+        global STANDALONE_MARKERS  # ✅ Declare the global variable
 
-        # ✅ Handle city name search separately
+        latitude, longitude, error_msg = 40.650002, -73.949997, None  # Default to New York
+
+        # ✅ Handle city search
         if ctx.triggered_id == "search-standalone-city-btn" and city_name:
             lat, lon, error_msg = get_city_coordinates(city_name)
             if lat and lon:
@@ -348,7 +355,7 @@ def register_callbacks(app):
             else:
                 return html.Div(f"⚠️ Error: {error_msg}", className="text-danger")
 
-        # ✅ Handle GeoJSON Upload
+        # ✅ Decode GeoJSON if uploaded
         geojson_data = None
         if geojson_contents:
             try:
@@ -358,8 +365,12 @@ def register_callbacks(app):
             except Exception as e:
                 return html.Div(f"⚠️ Error parsing GeoJSON: {str(e)}", className="text-danger")
 
-        # ✅ Generate Standalone Map with Zoom
-        standalone_map_html = phylo_map.generate_standalone_map(geojson_data, latitude, longitude, zoom)
+        # ✅ Handle marker addition
+        if ctx.triggered_id == "standalone-add-marker-btn" and marker_name and marker_lat and marker_lon:
+            STANDALONE_MARKERS.append({"name": marker_name, "lat": float(marker_lat), "lon": float(marker_lon)})
+
+        # ✅ Generate map with markers
+        standalone_map_html = phylo_map.generate_folium_map(geojson_data, latitude, longitude, zoom, STANDALONE_MARKERS)
 
         return html.Iframe(
             srcDoc=standalone_map_html,
@@ -368,58 +379,3 @@ def register_callbacks(app):
             style={"border": "none"}
         )
 
-        if not file_contents:
-            return html.Div("No file uploaded yet.", className="text-warning"), html.Div()
-
-        try:
-            # Decode the uploaded file
-            content_type, content_string = file_contents.split(',')
-            decoded = base64.b64decode(content_string)
-            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), sep='\t')
-
-            # ✅ Rename first column dynamically
-            first_column_name = df.columns[0]
-            df.rename(columns={first_column_name: "Sample"}, inplace=True)
-
-            # ✅ Melt DataFrame correctly
-            df_melted = df.melt(id_vars=["Sample"], var_name="Variable", value_name="Value")
-
-            # ✅ Ensure pivot table is properly formed
-            if not df_melted["Variable"].isin(df["Sample"]).all():
-                return html.Div("Error: Some column names do not match the sample names.", className="text-danger"), html.Div()
-
-            # ✅ Pivot DataFrame for heatmap
-            pivot_df = df_melted.pivot(index="Sample", columns="Variable", values="Value")
-
-            # ✅ Create the heatmap using Plotly
-            fig = px.imshow(
-                pivot_df,
-                color_continuous_scale='rainbow',
-                labels={'color': 'SNP Distance'},
-                title="SNP Distance Heatmap"
-            )
-
-            # ✅ Make the plot larger
-            fig.update_layout(
-                xaxis=dict(tickangle=-45),
-                margin=dict(l=40, r=40, t=40, b=40),
-                width=1000,  # Set the width
-                height=800   # Set the height
-            )
-
-            heatmap_graph = dcc.Graph(figure=fig)
-
-            # ✅ Create DataTable
-            table = dash_table.DataTable(
-                data=df.to_dict("records"),  # Convert DataFrame to dictionary format
-                columns=[{"name": i, "id": i} for i in df.columns],  # Column names
-                page_size=10,  # Show 10 rows per page
-                style_table={'overflowX': 'auto'},  # Enable scrolling
-                style_header={'backgroundColor': 'lightgrey', 'fontWeight': 'bold', 'color': 'black'},  # ✅ Make header text black
-                style_cell={'textAlign': 'center', 'padding': '10px', 'color': 'black'},  # ✅ Make all table text black
-            )
-
-            return heatmap_graph, table  # Return both the heatmap and the DataTable
-
-        except Exception as e:
-            return html.Div(f"Error processing file: {str(e)}", className="text-danger"), html.Div()
