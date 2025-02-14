@@ -1,6 +1,6 @@
 from dash import Dash
 import dash_bootstrap_components as dbc
-from layout import app_layout
+from layout import app_layout  # ✅ Includes new tabs
 import callbacks 
 import logging
 
@@ -8,10 +8,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 # Initialize app
 app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
-
-# ❌ REMOVE suppress_callback_exceptions
-# app.config.suppress_callback_exceptions = True  ❌ REMOVE this line!
-
 
 app.layout = app_layout
 

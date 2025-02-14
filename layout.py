@@ -1,5 +1,6 @@
 from dash import dcc, html
 import dash_bootstrap_components as dbc
+from info_layout import about_tab, how_to_use_tab
 
 # Define the layout
 app_layout = dbc.Container([
@@ -232,7 +233,10 @@ app_layout = dbc.Container([
             ])
         ]),
 
+        about_tab,
+        how_to_use_tab
     ],
+    
     colors={
         "border": "black",      # ✅ Make tab borders black
         "primary": "black",      # ✅ Make selected tab text black
