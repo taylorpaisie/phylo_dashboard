@@ -89,7 +89,7 @@ app_layout = dbc.Container([
                     dbc.Col([
                         html.Label("Search for a City Name:"),
                         dcc.Input(id="search-standalone-city", type="text", placeholder="e.g., Paris", className="mb-2"),
-                        dbc.Button("Search", id="search-standalone-city-btn", color="primary", className="mt-2"),
+                        dbc.Button("Search", id="search-standalone-city-btn", color="info", className="mt-2"),
                         html.Div(id="standalone-city-search-status", className="mt-2 text-success"),
                     ], width=6)
                 ]),
@@ -103,18 +103,29 @@ app_layout = dbc.Container([
                         html.Label("Marker Name:"),
                         dcc.Input(id="standalone-marker-name", type="text", placeholder="Enter marker name", className="mb-2"),
                     ], width=3),
+
+                    dbc.Col([
+                        html.Label("City Name (Optional):"),
+                        dcc.Input(id="standalone-marker-city", type="text", placeholder="Enter city name", className="mb-2"),
+                        dbc.Button("Find Location", id="standalone-marker-city-btn", color="info", className="mt-2"),
+                        html.Div(id="standalone-city-marker-status", className="text-success mt-1")
+                    ], width=3),
+
                     dbc.Col([
                         html.Label("Latitude:"),
                         dcc.Input(id="standalone-marker-lat", type="number", placeholder="Enter latitude", className="mb-2"),
-                    ], width=3),
+                    ], width=2),
+                    
                     dbc.Col([
                         html.Label("Longitude:"),
                         dcc.Input(id="standalone-marker-lon", type="number", placeholder="Enter longitude", className="mb-2"),
-                    ], width=3),
+                    ], width=2),
+                    
                     dbc.Col([
                         dbc.Button("Add Marker", id="standalone-add-marker-btn", color="success", className="mt-4"),
-                    ], width=3),
+                    ], width=2),
                 ]),
+
                 html.Br(),
 
                 # ✅ Zoom Slider

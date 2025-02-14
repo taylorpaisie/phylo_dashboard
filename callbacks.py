@@ -286,7 +286,7 @@ def register_callbacks(app):
     @app.callback(
         Output('phylo-map-container', 'children'),
         [Input('upload-geojson', 'contents'),
-        Input('map-city', 'value'),  # Added city name input
+        Input('map-city', 'value'),  # Accept city name input
         Input('map-lat', 'value'),
         Input('map-lon', 'value'),
         Input('map-zoom', 'value'),
@@ -296,9 +296,9 @@ def register_callbacks(app):
         State('marker-lon', 'value')]
     )
     def update_folium_map(geojson_contents, city_name, latitude, longitude, zoom, n_clicks, marker_name, marker_lat, marker_lon):
-        global MARKERS  # Use global storage for markers
+        global MARKERS  # Preserve added markers
 
-        # ✅ 1. Convert city name to coordinates if provided
+        # Convert city name to lat/lon if provided
         if city_name:
             geocoded_lat, geocoded_lon, error_msg = get_city_coordinates(city_name)
             if geocoded_lat and geocoded_lon:
@@ -306,18 +306,27 @@ def register_callbacks(app):
             else:
                 return html.Div(f"⚠️ Error: {error_msg}", className="text-danger")
 
-        # ✅ 2. Decode GeoJSON if uploaded
+        # Decode GeoJSON if uploaded
         geojson_data = None
         if geojson_contents:
             content_type, content_string = geojson_contents.split(',')
             decoded = base64.b64decode(content_string).decode('utf-8')
             geojson_data = json.loads(decoded)
 
-        # ✅ 3. Add new marker if button clicked
-        if ctx.triggered_id == "add-marker-btn" and marker_name and marker_lat and marker_lon:
-            MARKERS.append({"name": marker_name, "lat": float(marker_lat), "lon": float(marker_lon)})
+        # Add a new marker if button clicked
+        if ctx.triggered_id == "add-marker-btn":
+            if marker_name:
+                # If lat/lon for the marker is provided, use them. Otherwise, use city name lookup.
+                if marker_lat is not None and marker_lon is not None:
+                    marker_lat, marker_lon = float(marker_lat), float(marker_lon)
+                elif city_name:
+                    marker_lat, marker_lon = latitude, longitude  # Use city geolocation
+                else:
+                    return html.Div("⚠️ Error: Provide either a city name or latitude/longitude for the marker.", className="text-danger")
 
-        # ✅ 4. Generate updated Folium map
+                MARKERS.append({"name": marker_name, "lat": marker_lat, "lon": marker_lon})
+
+        # Generate the updated Folium map
         folium_map_html = phylo_map.generate_folium_map(geojson_data, latitude, longitude, zoom, MARKERS)
 
         return html.Iframe(
@@ -327,36 +336,47 @@ def register_callbacks(app):
             style={"border": "none"}
         )
 
+
     #standalone map tab
+    @app.callback(
+        [Output('standalone-city-marker-status', 'children'),
+        Output('standalone-marker-lat', 'value'),
+        Output('standalone-marker-lon', 'value')],
+        [Input('standalone-marker-city-btn', 'n_clicks')],
+        [State('standalone-marker-city', 'value')]
+    )
+    def find_city_coordinates(n_clicks, city_name):
+        """Find coordinates for the entered city name when clicking 'Find Location'."""
+        if not n_clicks or not city_name:
+            raise PreventUpdate
+
+        lat, lon, error_msg = get_city_coordinates(city_name)
+        if lat and lon:
+            return f"✅ Found: {lat}, {lon}", lat, lon
+        else:
+            return f"⚠️ Error: {error_msg}", None, None
+
+
     @app.callback(
         Output('standalone-map-container', 'children'),
         [Input('upload-standalone-geojson', 'contents'),
-        Input('search-standalone-city-btn', 'n_clicks'),
         Input('standalone-map-zoom', 'value'),
-        Input('standalone-add-marker-btn', 'n_clicks')],  # Add marker button
+        Input('standalone-add-marker-btn', 'n_clicks')],
         [State('upload-standalone-geojson', 'filename'),
-        State('search-standalone-city', 'value'),
         State('standalone-marker-name', 'value'),
+        State('standalone-marker-city', 'value'),
         State('standalone-marker-lat', 'value'),
         State('standalone-marker-lon', 'value')]
     )
-    def update_standalone_map(geojson_contents, n_clicks, zoom, marker_clicks, filename, city_name, marker_name, marker_lat, marker_lon):
+    def update_standalone_map(geojson_contents, zoom, marker_clicks, filename, marker_name, marker_city, marker_lat, marker_lon):
         """Update Standalone Folium map based on GeoJSON upload, city search, and markers."""
-        
+
         global STANDALONE_MARKERS  # ✅ Declare the global variable
 
-        latitude, longitude, error_msg = 40.650002, -73.949997, None  # Default to New York
-
-        # ✅ Handle city search
-        if ctx.triggered_id == "search-standalone-city-btn" and city_name:
-            lat, lon, error_msg = get_city_coordinates(city_name)
-            if lat and lon:
-                latitude, longitude = lat, lon
-            else:
-                return html.Div(f"⚠️ Error: {error_msg}", className="text-danger")
+        latitude, longitude = 40.650002, -73.949997  # Default: New York
+        geojson_data = None
 
         # ✅ Decode GeoJSON if uploaded
-        geojson_data = None
         if geojson_contents:
             try:
                 content_type, content_string = geojson_contents.split(',')
@@ -365,11 +385,20 @@ def register_callbacks(app):
             except Exception as e:
                 return html.Div(f"⚠️ Error parsing GeoJSON: {str(e)}", className="text-danger")
 
-        # ✅ Handle marker addition
-        if ctx.triggered_id == "standalone-add-marker-btn" and marker_name and marker_lat and marker_lon:
+        # ✅ Add a new marker if button clicked
+        if ctx.triggered_id == "standalone-add-marker-btn" and marker_name:
+            if marker_city:
+                # Convert city name to coordinates
+                marker_lat, marker_lon, error_msg = get_city_coordinates(marker_city)
+                if error_msg:
+                    return html.Div(f"⚠️ Error: {error_msg}", className="text-danger")
+
+            if marker_lat is None or marker_lon is None:
+                return html.Div("⚠️ Error: Provide either a city name or latitude/longitude for the marker.", className="text-danger")
+
             STANDALONE_MARKERS.append({"name": marker_name, "lat": float(marker_lat), "lon": float(marker_lon)})
 
-        # ✅ Generate map with markers
+        # ✅ Generate updated Folium map
         standalone_map_html = phylo_map.generate_folium_map(geojson_data, latitude, longitude, zoom, STANDALONE_MARKERS)
 
         return html.Iframe(
@@ -378,4 +407,5 @@ def register_callbacks(app):
             height="600px",
             style={"border": "none"}
         )
+
 
