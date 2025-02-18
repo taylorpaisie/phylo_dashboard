@@ -408,4 +408,3 @@ def register_callbacks(app):
             style={"border": "none"}
         )
 
-

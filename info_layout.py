@@ -20,7 +20,7 @@ about_content = dbc.Container([
         html.A("Github Repositories", href="https://github.com/taylorpaisie", target="_blank", className="text-primary fw-bold"),
         "."
     ]),
-    html.P(["If you have any questions or issues about the SNP Workflow Dashboard, please submit an issue on the ",
+    html.P(["If you have any questions or issues about the Phylogenetic Tree and Map Visualization Dashboard, please submit an issue on the ",
         html.A("Phylogenetic Tree and Map Visualization Dashboard Github Repository", href="https://github.com/taylorpaisie/phylo_dashboard", target="_blank", className="text-primary fw-bold"),
         "."
     ])

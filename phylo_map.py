@@ -15,7 +15,7 @@ def generate_folium_map(geojson_data=None, latitude=40.650002, longitude=-73.949
             'color': '#58bbff', 'fillColor': '#58bbff', 'fillOpacity': 0.25
         }).add_to(m)
 
-    radium=30
+    radium = 30
     folium.CircleMarker(
         location=[latitude, longitude],
         popup="Selected Location",
@@ -27,7 +27,8 @@ def generate_folium_map(geojson_data=None, latitude=40.650002, longitude=-73.949
     ).add_to(m)
 
     # ✅ Add user-defined markers
-    for marker in markers:
+    colors = ["blue", "green", "red"]  # Three distinct colors
+    for i, marker in enumerate(markers):
         folium.CircleMarker(
             location=[marker["lat"], marker["lon"]],
             popup=marker["name"],
@@ -35,9 +36,8 @@ def generate_folium_map(geojson_data=None, latitude=40.650002, longitude=-73.949
             weight=1,
             fill_opacity=0.6,
             opacity=1,
-            fill_color="green",
+            fill_color=colors[i % len(colors)],  # Cycle through colors
         ).add_to(m)
-
 
     return m._repr_html_()
 
@@ -52,8 +52,7 @@ def generate_standalone_map(geojson_data=None, latitude=30, longitude=-80, zoom=
             'color': 'lightgray', 'fillColor': 'lightgray', 'fillOpacity': 0.4
         }).add_to(m)
 
-    # ✅ Add a different marker style
-    radium=30
+    radium = 30
     folium.CircleMarker(
         location=[latitude, longitude],
         popup="Selected Location",
@@ -65,6 +64,3 @@ def generate_standalone_map(geojson_data=None, latitude=30, longitude=-80, zoom=
     ).add_to(m)
 
     return m._repr_html_()
-
-
-
