@@ -12,6 +12,19 @@ about_content = dbc.Container([
         "The Phylogenetic Tree Visualization tab provides a way to analyze evolutionary relationships, "
         "while the Map Visualization tab helps in locating specimens geographically."
     ),
+    
+    html.P([
+        "This application was created and maintained by Taylor K. Paisie. Check out my ",
+        html.A("website", href="https://taylorpaisie.github.io/", target="_blank", className="text-primary fw-bold"),
+        " or my ",
+        html.A("Github Repositories", href="https://github.com/taylorpaisie", target="_blank", className="text-primary fw-bold"),
+        "."
+    ]),
+    html.P(["If you have any questions or issues about the SNP Workflow Dashboard, please submit an issue on the ",
+        html.A("Phylogenetic Tree and Map Visualization Dashboard Github Repository", href="https://github.com/taylorpaisie/phylo_dashboard", target="_blank", className="text-primary fw-bold"),
+        "."
+    ])
+
 ], className="mt-4")
 
 # How to Use Tab Content
