@@ -38,7 +38,20 @@ how_to_use_content = dbc.Container([
         html.Li("Use the Map Visualization tab to explore locations and add custom markers."),
         html.Li("Toggle the tip labels to show or hide tree node names."),
     ]),
-    html.P("For more details, refer to the documentation or contact support.")
+    html.P("For more details, refer to the documentation or contact support."),
+
+    html.Figure([
+        html.Img(
+            src='/assets/hiding_ham.jpg',  # Path to the image
+            alt='Hiding Hamilton',
+            style={'width': '25%', 'height': 'auto', 'marginTop': '20px'}
+        ),
+        html.Figcaption(
+            "Don't be like Hamilton and hide from your data!",
+            style={'textAlign': 'left', 'fontStyle': 'italic', 'marginTop': '10px'}
+        )
+    ])
+
 ], className="mt-4")
 
 # Exporting the layouts
