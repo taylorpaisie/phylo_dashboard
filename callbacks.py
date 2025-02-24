@@ -17,6 +17,7 @@ import dash_bio as dashbio
 from dash import ctx
 import phylo_map
 from Bio import Phylo, SeqIO
+from plotly.colors import qualitative
 from dotenv import load_dotenv  
 
 # Geopy (for geocoding city names)
@@ -112,12 +113,15 @@ def draw_clade_rectangular(clade, x_start, line_shapes, x_coords, y_coords):
             draw_clade_rectangular(subclade, x_end, line_shapes, x_coords, y_coords)
 
 def create_tree_plot(tree_file, metadata_file, show_tip_labels):
-    from plotly.colors import qualitative
-
     # Load tree and metadata
     tree = Phylo.read(tree_file, 'newick')
     metadata = pd.read_csv(metadata_file, sep='\t')
-    metadata['location'] = metadata['location'].fillna('Unknown')  # Handle missing locations
+
+    # Validate required columns
+    if 'taxa' not in metadata.columns or 'location' not in metadata.columns:
+        raise ValueError("Metadata file must contain 'taxa' and 'location' columns.")
+
+    metadata['location'] = metadata['location'].fillna('Unknown')
 
     # Map metadata to colors
     location_colors = {
@@ -178,29 +182,28 @@ def create_tree_plot(tree_file, metadata_file, show_tip_labels):
     for clade in tree.get_terminals():
         x = x_coords[clade]
         y = y_coords[clade]
-        if clade.name in metadata['taxa'].values:
-            meta_row = metadata[metadata['taxa'] == clade.name].iloc[0]
-            location = meta_row['location']
-            color = location_colors.get(location, 'gray')
+        meta_row = metadata[metadata['taxa'] == clade.name]
+        location = meta_row['location'].iloc[0] if not meta_row.empty else 'Unknown'
+        color = location_colors.get(location, 'gray')
 
-            show_legend = location not in seen_locations
-            if show_legend:
-                seen_locations.add(location)
+        show_legend = location not in seen_locations
+        if show_legend:
+            seen_locations.add(location)
 
-            tip_markers.append(go.Scatter(
-                x=[x],
-                y=[y],
-                mode='markers+text' if show_tip_labels else 'markers',
-                marker=dict(size=10, color=color, line=dict(width=1, color='black')),
-                name=location if show_legend else None,
-                text=f"<b>{clade.name}</b><br>Location: {location}" if show_tip_labels else "",
-                textposition="middle right",
-                hoverinfo='text',
-                showlegend=show_legend
-            ))
+        tip_markers.append(go.Scatter(
+            x=[x],
+            y=[y],
+            mode='markers+text' if show_tip_labels else 'markers',
+            marker=dict(size=10, color=color, line=dict(width=1, color='black')),
+            name=location if show_legend else None,
+            text=f"<b>{clade.name}</b><br>Location: {location}" if show_tip_labels else "",
+            textposition="middle right",
+            hoverinfo='text',
+            showlegend=show_legend
+        ))
 
     layout = go.Layout(
-        title='Phylogenetic Tree with Tip Label Toggle',
+        title='Phylogenetic Tree with Metadata',
         xaxis=dict(title='Evolutionary Distance', showgrid=True, zeroline=False),
         yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-1, max_y + 1]),
         shapes=line_shapes,
@@ -211,78 +214,80 @@ def create_tree_plot(tree_file, metadata_file, show_tip_labels):
     return go.Figure(data=tip_markers, layout=layout)
 
 def register_callbacks(app):
-    # Callback for Phylogenetic Tree Visualization
     @app.callback(
         Output('tree-graph-container', 'children'),
         [Input('upload-tree', 'contents'),
-        Input('upload-metadata', 'contents'),
-        Input('show-tip-labels', 'value')],
+         Input('upload-metadata', 'contents'),
+         Input('show-tip-labels', 'value')],
         [State('upload-tree', 'filename'),
-        State('upload-metadata', 'filename')]
+         State('upload-metadata', 'filename')]
     )
     def update_tree_tab1(tree_contents, metadata_contents, show_labels, tree_filename, metadata_filename):
-        if not tree_contents or not metadata_contents:
-            return html.Div("Please upload both a tree file and a metadata file.", className="text-warning")
+        print("Triggered update_tree_tab1 callback")  # Debug
+        if tree_contents and metadata_contents:
+            try:
+                # Decode tree and metadata files
+                tree_data = base64.b64decode(tree_contents.split(",", 1)[1]).decode("utf-8")
+                metadata_data = base64.b64decode(metadata_contents.split(",", 1)[1]).decode("utf-8")
+                tree_file = "uploaded_tree.tree"
+                metadata_file = "uploaded_metadata.tsv"
 
-        try:
-            # Decode tree and metadata
-            tree_data = base64.b64decode(tree_contents.split(",", 1)[1]).decode("utf-8")
-            metadata_data = base64.b64decode(metadata_contents.split(",", 1)[1]).decode("utf-8")
-            
-            # Save files
-            tree_file = "tree_tab1.tree"
-            metadata_file = "metadata_tab1.tsv"
-            with open(tree_file, "w") as f:
-                f.write(tree_data)
-            with open(metadata_file, "w") as f:
-                f.write(metadata_data)
+                with open(tree_file, "w") as f:
+                    f.write(tree_data)
+                with open(metadata_file, "w") as f:
+                    f.write(metadata_data)
+                
+                print(f"Tree and metadata files saved: {tree_filename}, {metadata_filename}")  # Debug
 
-            # Generate tree visualization
-            show_tip_labels = 'SHOW' in show_labels
-            fig = create_tree_plot(tree_file, metadata_file, show_tip_labels)
-            
-            return dcc.Graph(figure=fig)
+                show_tip_labels = 'SHOW' in show_labels
 
-        except Exception as e:
-            return html.Div(f"Error processing tree file: {str(e)}", className="text-danger")
-
+                # Generate tree plot
+                fig = create_tree_plot(tree_file, metadata_file, show_tip_labels)
+                print("Tree plot successfully created for Tab 1")  # Debug
+                return dcc.Graph(figure=fig)
+            except Exception as e:
+                print(f"Error processing tree or metadata files in Tab 1: {str(e)}")  # Debug
+                return html.Div(f"Error: {str(e)}", className="text-danger")
+        print("Tree or metadata files missing for Tab 1")  # Debug
+        return html.Div("Please upload both a tree file and a metadata file.", className="text-warning")
 
     @app.callback(
         Output('tree-graph-container-2', 'children'),
         [Input('upload-tree-2', 'contents'),
-        Input('upload-metadata-2', 'contents'),
-        Input('show-tip-labels-2', 'value')],
+         Input('upload-metadata-2', 'contents'),
+         Input('show-tip-labels-2', 'value')],
         [State('upload-tree-2', 'filename'),
-        State('upload-metadata-2', 'filename')]
+         State('upload-metadata-2', 'filename')]
     )
     def update_tree_tab2(tree_contents, metadata_contents, show_labels, tree_filename, metadata_filename):
+        print("Triggered update_tree_tab2 callback")  # Debug
         if not tree_contents or not metadata_contents:
+            print("Tree or metadata files missing for Tab 2")  # Debug
             return html.Div("Please upload both a tree file and a metadata file.", className="text-warning")
 
         try:
-            # Decode tree and metadata
             tree_data = base64.b64decode(tree_contents.split(",", 1)[1]).decode("utf-8")
             metadata_data = base64.b64decode(metadata_contents.split(",", 1)[1]).decode("utf-8")
-
-            # Save files
             tree_file = "tree_tab2.tree"
             metadata_file = "metadata_tab2.tsv"
+
             with open(tree_file, "w") as f:
                 f.write(tree_data)
             with open(metadata_file, "w") as f:
                 f.write(metadata_data)
+            
+            print(f"Tree and metadata files saved for Tab 2: {tree_filename}, {metadata_filename}")  # Debug
 
-            # Generate tree visualization
             show_tip_labels = 'SHOW' in show_labels
             fig = create_tree_plot(tree_file, metadata_file, show_tip_labels)
-            
+            print("Tree plot successfully created for Tab 2")  # Debug
             return dcc.Graph(figure=fig)
-
         except Exception as e:
-            return html.Div(f"Error processing tree file: {str(e)}", className="text-danger")
+            print(f"Error processing tree or metadata files in Tab 2: {str(e)}")  # Debug
+            return html.Div(f"Error: {str(e)}", className="text-danger")
+
 
     # Callback for Folium Map Display
-
     @app.callback(
         Output('phylo-map-container', 'children'),
         [Input('upload-geojson', 'contents'),
