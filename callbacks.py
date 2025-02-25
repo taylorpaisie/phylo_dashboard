@@ -113,6 +113,12 @@ def draw_clade_rectangular(clade, x_start, line_shapes, x_coords, y_coords):
             draw_clade_rectangular(subclade, x_end, line_shapes, x_coords, y_coords)
 
 
+def generate_location_colors(locations):
+    unique_locations = locations.unique()
+    colors = px.colors.qualitative.Bold  # Pick a color palette
+    color_map = {loc: colors[i % len(colors)] for i, loc in enumerate(unique_locations)}
+    return color_map
+
 def create_tree_plot(tree_file, metadata_file, show_tip_labels, height=1000, width=900):
     # Load tree and metadata
     tree = Phylo.read(tree_file, 'newick')
@@ -126,13 +132,8 @@ def create_tree_plot(tree_file, metadata_file, show_tip_labels, height=1000, wid
 
     metadata['location'] = metadata['location'].fillna('Unknown')
 
-    # Custom color palette
-    location_colors = {
-        'USA: GA': '#d9434e',
-        'USA: OH': '#540d6e',
-        'Thailand': '#1e90bf',
-        'Vietnam': '#bce6a0'
-    }
+    # Dynamically generate color mapping from metadata locations
+    location_colors = generate_location_colors(metadata['location'])
 
     # Generate x and y coordinates using cumulative branch lengths
     x_coords = {}
@@ -204,7 +205,7 @@ def create_tree_plot(tree_file, metadata_file, show_tip_labels, height=1000, wid
                 x=[x],
                 y=[y],
                 mode='markers+text' if show_tip_labels else 'markers',
-                marker=dict(size=8, color=color, line=dict(width=1.5, color='black')),
+                marker=dict(size=12, color=color, line=dict(width=1.5, color='black')),
                 name=location if show_legend else None,
                 text=f"<b>{clade.name}</b><br>Location: {location}" if show_tip_labels else "",
                 textposition="middle right",
@@ -218,7 +219,7 @@ def create_tree_plot(tree_file, metadata_file, show_tip_labels, height=1000, wid
                     x=[x],
                     y=[y],
                     mode='markers',
-                    marker=dict(size=6, color='red', symbol='triangle-up'),
+                    marker=dict(size=10, color='black', symbol='diamond'),
                     hoverinfo='skip',
                     showlegend=False
                 ))
