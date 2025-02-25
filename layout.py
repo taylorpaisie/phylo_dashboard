@@ -87,7 +87,7 @@ app_layout = dbc.Container([
                 # Location Search
                 dbc.Row([
                     dbc.Col([
-                        html.Label("Search for a City Name:"),
+                        html.Label("Search for a location Name:"),
                         dcc.Input(id="search-standalone-city", type="text", placeholder="e.g., Paris", className="mb-2"),
                         dbc.Button("Search", id="search-standalone-city-btn", color="info", className="mt-2"),
                         html.Div(id="standalone-city-search-status", className="mt-2 text-success"),
@@ -105,8 +105,8 @@ app_layout = dbc.Container([
                     ], width=3),
 
                     dbc.Col([
-                        html.Label("City Name (Optional):"),
-                        dcc.Input(id="standalone-marker-city", type="text", placeholder="Enter city name", className="mb-2"),
+                        html.Label("Locationn Name (Optional):"),
+                        dcc.Input(id="standalone-marker-city", type="text", placeholder="Enter location name", className="mb-2"),
                         dbc.Button("Find Location", id="standalone-marker-city-btn", color="info", className="mt-2"),
                         html.Div(id="standalone-city-marker-status", className="text-success mt-1")
                     ], width=3),
@@ -205,25 +205,7 @@ app_layout = dbc.Container([
                             marks={i: str(i) for i in range(5, 21, 3)}
                         ),
                         html.Br(),
-                        
-                        # html.H5("Add Custom Marker", className="text-center mt-4", style={'color': 'white'}),
-                        # dbc.Row([
-                        #     dbc.Col([
-                        #         html.Label("Marker Name:"),
-                        #         dcc.Input(id="marker-name", type="text", placeholder="Enter marker name", className="mb-2"),
-                        #     ], width=3),
-                        #     dbc.Col([
-                        #         html.Label("Latitude:"),
-                        #         dcc.Input(id="marker-lat", type="number", placeholder="Enter latitude", className="mb-2"),
-                        #     ], width=3),
-                        #     dbc.Col([
-                        #         html.Label("Longitude:"),
-                        #         dcc.Input(id="marker-lon", type="number", placeholder="Enter longitude", className="mb-2"),
-                        #     ], width=3),
-                        #     dbc.Col([
-                        #         dbc.Button("Add Marker", id="add-marker-btn", color="success", className="mt-4"),
-                        #     ], width=3),
-                        # ]),
+                    
 
                         html.H5("Add Custom Marker", className="text-center mt-4", style={'color': 'white'}),
                         dbc.Row([
@@ -234,7 +216,7 @@ app_layout = dbc.Container([
 
                             dbc.Col([
                                 html.Label("Location Name (Optional):"),
-                                dcc.Input(id="phylo-marker-city", type="text", placeholder="Enter city name", className="mb-2"),
+                                dcc.Input(id="phylo-marker-city", type="text", placeholder="Enter location name", className="mb-2"),
                                 dbc.Button("Find Location", id="phylo-marker-city-btn", color="info", className="mt-2"),
                                 html.Div(id="phylo-city-marker-status", className="text-success mt-1")
                             ], width=3),
