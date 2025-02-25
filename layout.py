@@ -15,7 +15,7 @@ app_layout = dbc.Container([
         dcc.Tab(label='Phylogenetic Tree Visualization', children=[
             dbc.Container([
                 dbc.Row([
-                    dbc.Col(html.H5("Upload a Newick Tree File, Metadata File, and GeoJSON for Map", className="text-center", style={'color': 'white'}))
+                    dbc.Col(html.H5("Upload a Newick Tree File and Metadata File", className="text-center", style={'color': 'white'}))
                 ]),
 
                 # Upload Section

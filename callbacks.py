@@ -112,9 +112,12 @@ def draw_clade_rectangular(clade, x_start, line_shapes, x_coords, y_coords):
         for subclade in clade:
             draw_clade_rectangular(subclade, x_end, line_shapes, x_coords, y_coords)
 
-def create_tree_plot(tree_file, metadata_file, show_tip_labels):
+
+def create_tree_plot(tree_file, metadata_file, show_tip_labels, height=1000, width=900):
     # Load tree and metadata
     tree = Phylo.read(tree_file, 'newick')
+    tree.root_at_midpoint()  # Midpoint rooting for better visual balance
+
     metadata = pd.read_csv(metadata_file, sep='\t')
 
     # Validate required columns
@@ -123,49 +126,54 @@ def create_tree_plot(tree_file, metadata_file, show_tip_labels):
 
     metadata['location'] = metadata['location'].fillna('Unknown')
 
-    # Map metadata to colors
+    # Custom color palette
     location_colors = {
-        loc: qualitative.Plotly[i % len(qualitative.Plotly)]
-        for i, loc in enumerate(metadata['location'].unique())
+        'USA: GA': '#d9434e',
+        'USA: OH': '#540d6e',
+        'Thailand': '#1e90bf',
+        'Vietnam': '#bce6a0'
     }
 
-    # Generate x and y coordinates
+    # Generate x and y coordinates using cumulative branch lengths
     x_coords = {}
     y_coords = {}
     max_y = 0
 
     def assign_coordinates(clade, x_start=0, y_start=0):
         nonlocal max_y
-        branch_length = clade.branch_length if clade.branch_length else 0.001
+        branch_length = clade.branch_length if clade.branch_length else 0.0
+        x_current = x_start + branch_length
         if clade.is_terminal():
-            x_coords[clade] = x_start + branch_length
+            x_coords[clade] = x_current
             y_coords[clade] = y_start
             max_y = max(max_y, y_start)
             return y_start + 1
         else:
             y_positions = []
             for child in clade.clades:
-                y_start = assign_coordinates(child, x_start + branch_length, y_start)
+                y_start = assign_coordinates(child, x_current, y_start)
                 y_positions.append(y_start - 1)
-            x_coords[clade] = x_start + branch_length
+            x_coords[clade] = x_current
             y_coords[clade] = sum(y_positions) / len(y_positions)
             return y_start
 
     assign_coordinates(tree.root)
 
-    # Create line shapes for branches
+    # Create line shapes for branches using accurate branch lengths
     line_shapes = []
     for clade in tree.find_clades(order='level'):
         x_start = x_coords[clade]
         y_start = y_coords[clade]
         if clade.clades:
             y_positions = [y_coords[child] for child in clade.clades]
+            # Vertical line for connecting children
             line_shapes.append(dict(
                 type='line',
                 x0=x_start, y0=min(y_positions),
                 x1=x_start, y1=max(y_positions),
-                line=dict(color='black', width=1)
+                line=dict(color='black', width=3)  # Thicker lines
             ))
+            # Horizontal lines for branches
             for child in clade.clades:
                 x_end = x_coords[child]
                 y_end = y_coords[child]
@@ -173,45 +181,71 @@ def create_tree_plot(tree_file, metadata_file, show_tip_labels):
                     type='line',
                     x0=x_start, y0=y_end,
                     x1=x_end, y1=y_end,
-                    line=dict(color='black', width=1)
+                    line=dict(color='black', width=3)  # Thicker lines
                 ))
 
-    # Create scatter points for tips
+    # Create scatter points for tips and support values > 90
     tip_markers = []
+    node_markers = []
     seen_locations = set()
-    for clade in tree.get_terminals():
+    for clade in tree.find_clades():
         x = x_coords[clade]
         y = y_coords[clade]
-        meta_row = metadata[metadata['taxa'] == clade.name]
-        location = meta_row['location'].iloc[0] if not meta_row.empty else 'Unknown'
-        color = location_colors.get(location, 'gray')
+        if clade.is_terminal():
+            meta_row = metadata[metadata['taxa'] == clade.name]
+            location = meta_row['location'].iloc[0] if not meta_row.empty else 'Unknown'
+            color = location_colors.get(location, 'gray')
 
-        show_legend = location not in seen_locations
-        if show_legend:
-            seen_locations.add(location)
+            show_legend = location not in seen_locations
+            if show_legend:
+                seen_locations.add(location)
 
-        tip_markers.append(go.Scatter(
-            x=[x],
-            y=[y],
-            mode='markers+text' if show_tip_labels else 'markers',
-            marker=dict(size=10, color=color, line=dict(width=1, color='black')),
-            name=location if show_legend else None,
-            text=f"<b>{clade.name}</b><br>Location: {location}" if show_tip_labels else "",
-            textposition="middle right",
-            hoverinfo='text',
-            showlegend=show_legend
-        ))
+            tip_markers.append(go.Scatter(
+                x=[x],
+                y=[y],
+                mode='markers+text' if show_tip_labels else 'markers',
+                marker=dict(size=8, color=color, line=dict(width=1.5, color='black')),
+                name=location if show_legend else None,
+                text=f"<b>{clade.name}</b><br>Location: {location}" if show_tip_labels else "",
+                textposition="middle right",
+                hoverinfo='text',
+                showlegend=show_legend
+            ))
+        else:
+            # Plot support values > 90 as red triangles
+            if clade.confidence and clade.confidence > 90:
+                node_markers.append(go.Scatter(
+                    x=[x],
+                    y=[y],
+                    mode='markers',
+                    marker=dict(size=6, color='red', symbol='triangle-up'),
+                    hoverinfo='skip',
+                    showlegend=False
+                ))
+
+    # Add a scale bar equivalent
+    scale_bar = [
+        dict(
+            type='line',
+            x0=0, y0=-1,
+            x1=0.05, y1=-1,
+            line=dict(color='black', width=2)
+        )
+    ]
 
     layout = go.Layout(
-        title='Phylogenetic Tree with Metadata',
-        xaxis=dict(title='Evolutionary Distance', showgrid=True, zeroline=False),
+        title='Phylogenetic Tree with Midpoint Rooting and Support Values',
+        xaxis=dict(title='Evolutionary Distance', showgrid=False, zeroline=False),
         yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-1, max_y + 1]),
-        shapes=line_shapes,
-        height=800,
+        shapes=line_shapes + scale_bar,
+        height=height,  # Dynamic height
+        width=width,  # Dynamic width  # Adjust width for better alignment
         legend=dict(title="Locations", orientation="h", y=-0.2),
     )
 
-    return go.Figure(data=tip_markers, layout=layout)
+    return go.Figure(data=tip_markers + node_markers, layout=layout)
+
+
 
 def register_callbacks(app):
     @app.callback(
@@ -279,7 +313,9 @@ def register_callbacks(app):
             print(f"Tree and metadata files saved for Tab 2: {tree_filename}, {metadata_filename}")  # Debug
 
             show_tip_labels = 'SHOW' in show_labels
-            fig = create_tree_plot(tree_file, metadata_file, show_tip_labels)
+            # Use a smaller size for the tree on this specific tab
+            fig = create_tree_plot(tree_file, metadata_file, show_tip_labels, height=600, width=600)
+
             print("Tree plot successfully created for Tab 2")  # Debug
             return dcc.Graph(figure=fig)
         except Exception as e:

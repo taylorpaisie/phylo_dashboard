@@ -7,7 +7,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 # Initialize app
-app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+app = Dash(__name__, external_stylesheets=[dbc.themes.VAPOR])
 
 app.layout = app_layout
 
