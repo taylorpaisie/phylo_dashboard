@@ -1,7 +1,7 @@
 import folium
 import json
 
-def generate_folium_map(geojson_data=None, latitude=40.650002, longitude=-73.949997, zoom=6, markers=[]):
+def generate_folium_map(geojson_data=None, latitude=40.650002, longitude=-73.949997, zoom=4, markers=[]):
     """Generates a Folium map with optional markers."""
     
     attr = ('&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> '
@@ -44,14 +44,5 @@ def generate_standalone_map(geojson_data=None, latitude=30, longitude=-80, zoom=
         }).add_to(m)
 
     radium = 30
-    # folium.CircleMarker(
-    #     location=[latitude, longitude],
-    #     popup="Selected Location",
-    #     color="black",
-    #     weight=1,
-    #     fill_opacity=0.6,
-    #     opacity=1,
-    #     fill_color="red",
-    # ).add_to(m)
 
     return m._repr_html_()

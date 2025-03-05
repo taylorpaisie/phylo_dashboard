@@ -105,7 +105,7 @@ app_layout = dbc.Container([
                     ], width=3),
 
                     dbc.Col([
-                        html.Label("Locationn Name (Optional):"),
+                        html.Label("Location Name (Optional):"),
                         dcc.Input(id="standalone-marker-city", type="text", placeholder="Enter location name", className="mb-2"),
                         dbc.Button("Find Location", id="standalone-marker-city-btn", color="info", className="mt-2"),
                         html.Div(id="standalone-city-marker-status", className="text-success mt-1")
