@@ -373,6 +373,10 @@ def register_callbacks(app):
     )
     def update_phylo_folium_map(geojson_contents, city_name, latitude, longitude, zoom, n_clicks, marker_name, marker_city, marker_lat, marker_lon):
         global MARKERS
+        
+        # ✅ Clear the markers when the window is opened (i.e., first callback execution)
+        if ctx.triggered_id is None:
+            MARKERS.clear()
 
         # ✅ Convert city name to lat/lon if provided
         if marker_city:
@@ -409,6 +413,7 @@ def register_callbacks(app):
 
 
 
+
     #standalone map tab
     @app.callback(
         [Output('standalone-city-marker-status', 'children'),
@@ -441,12 +446,14 @@ def register_callbacks(app):
         State('standalone-marker-lon', 'value')]
     )
     def update_standalone_map(geojson_contents, zoom, marker_clicks, filename, marker_name, marker_city, marker_lat, marker_lon):
-        """Update Standalone Folium map based on GeoJSON upload, city search, and markers."""
-
-        global STANDALONE_MARKERS  # ✅ Declare the global variable
+        global STANDALONE_MARKERS
 
         latitude, longitude = 40.650002, -73.949997  # Default: New York
         geojson_data = None
+
+        # ✅ Clear standalone markers on page load
+        if ctx.triggered_id is None:
+            STANDALONE_MARKERS.clear()
 
         # ✅ Decode GeoJSON if uploaded
         if geojson_contents:
@@ -479,3 +486,4 @@ def register_callbacks(app):
             height="600px",
             style={"border": "none"}
         )
+
