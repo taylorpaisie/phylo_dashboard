@@ -61,7 +61,10 @@ app_layout = dbc.Container([
                                 {'label': 'Bold', 'value': 'Bold'},
                                 {'label': 'Pastel', 'value': 'Pastel'},
                                 {'label': 'Dark24', 'value': 'Dark24'},
-                                {'label': 'Alphabet', 'value': 'Alphabet'}
+                                {'label': 'Alphabet', 'value': 'Alphabet'},
+                                {'label': 'Set1', 'value': 'Set1'},
+                                {'label': 'Set2', 'value': 'Set2'},
+                                {'label': 'Set3', 'value': 'Set3'}
                             ],
                             value='Plotly',  # Default palette
                             clearable=False,
@@ -81,7 +84,10 @@ app_layout = dbc.Container([
                                 {'label': 'Bold', 'value': 'Bold'},
                                 {'label': 'Pastel', 'value': 'Pastel'},
                                 {'label': 'Dark24', 'value': 'Dark24'},
-                                {'label': 'Alphabet', 'value': 'Alphabet'}
+                                {'label': 'Alphabet', 'value': 'Alphabet'},
+                                {'label': 'Set1', 'value': 'Set1'},
+                                {'label': 'Set2', 'value': 'Set2'},
+                                {'label': 'Set3', 'value': 'Set3'}
                             ],
                             value='Plotly',  # Default palette
                             clearable=False,

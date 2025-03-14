@@ -341,7 +341,10 @@ def register_callbacks(app):
                     "Vivid": px.colors.qualitative.Vivid,
                     "Bold": px.colors.qualitative.Bold,
                     "Pastel": px.colors.qualitative.Pastel,
-                    "Dark24": px.colors.qualitative.Dark24
+                    "Dark24": px.colors.qualitative.Dark24,
+                    "Set1": px.colors.qualitative.Set1,
+                    "Set2": px.colors.qualitative.Set2,
+                    "Set3": px.colors.qualitative.Set3                    
                 }
                 selected_colors = color_palette_dict.get(selected_palette, px.colors.qualitative.Plotly)  # ✅ Fix variable name
                 selected_location_colors = color_palette_dict.get(selected_location_palette, px.colors.qualitative.Plotly)
@@ -566,7 +569,10 @@ def register_callbacks(app):
             "Bold": px.colors.qualitative.Bold,
             "Pastel": px.colors.qualitative.Pastel,
             "Dark24": px.colors.qualitative.Dark24,
-            "Alphabet": px.colors.qualitative.Alphabet
+            "Alphabet": px.colors.qualitative.Alphabet,
+            "Set1": px.colors.qualitative.Set1,
+            "Set2": px.colors.qualitative.Set2,
+            "Set3": px.colors.qualitative.Set3
         }
         selected_colors = color_palette_dict.get(selected_palette, px.colors.qualitative.Plotly)
         selected_location_colors = color_palette_dict.get(selected_location_palette, px.colors.qualitative.Plotly)
