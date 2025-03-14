@@ -47,13 +47,20 @@ app_layout = dbc.Container([
                         html.Br(),
                     ], width=12)
                 ]),
+                
 
                 # html.Hr(),  # Horizontal Line
 
                 # Row for Phylogenetic Tree and Map
+                # Inside your existing layout where the tree is displayed:
                 dbc.Row([
-                    dbc.Col(html.Div(id='tree-graph-container'), width=12)  # Tree on the Left (50%)
-                    # dbc.Col(html.Div(id='phylo-map-container'), width=6),  # Map on the Right (50%)
+                    dbc.Col(html.Div(id='tree-graph-container'), width=12),
+                    
+                    # New: Add a "Download as SVG" Button
+                    dbc.Col([
+                        dbc.Button("Download Tree as SVG", id="download-svg-btn", color="success", className="mt-3"),
+                        dcc.Download(id="download-svg")
+                    ], width=12, className="d-flex justify-content-center"),
                 ])
             ])
         ]),
