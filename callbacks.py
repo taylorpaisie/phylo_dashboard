@@ -124,10 +124,10 @@ def generate_location_colors(locations):
     return color_map
 
 
-def create_tree_plot(tree_file, metadata_file, show_tip_labels, height=None, width=None):
-    """Generates a rectangular phylogenetic tree plot with MLST heatmap, bootstrap support, and legends with group titles."""
+def create_tree_plot(tree_file, metadata_file, show_tip_labels, mlst_palette, location_palette):
+    """Generates a rectangular phylogenetic tree plot with MLST heatmap, bootstrap support, and location colors."""
 
-    # Load the tree
+    # Load tree
     tree = Phylo.read(tree_file, 'newick')
     tree.root_at_midpoint()
 
@@ -139,13 +139,14 @@ def create_tree_plot(tree_file, metadata_file, show_tip_labels, height=None, wid
     metadata['location'] = metadata['location'].fillna('Unknown')
     metadata['MLST'] = metadata['MLST'].fillna('Unknown')
 
-    # Generate location colors
-    location_colors = {loc: px.colors.qualitative.Plotly[i % len(px.colors.qualitative.Plotly)]
+    # ✅ Generate location colors dynamically using the selected location palette
+    location_colors = {loc: location_palette[i % len(location_palette)]
                        for i, loc in enumerate(metadata['location'].unique())}
 
-    # Generate MLST colors
-    mlst_colors = {mlst: pcolors.qualitative.Vivid[i % len(pcolors.qualitative.Vivid)]
+    # ✅ Generate MLST colors dynamically using the selected MLST palette
+    mlst_colors = {mlst: mlst_palette[i % len(mlst_palette)]
                    for i, mlst in enumerate(metadata['MLST'].unique())}
+
 
     # Compute tree node coordinates
     x_coords = tree.depths(unit_branch_lengths=True)
@@ -303,13 +304,19 @@ def create_tree_plot(tree_file, metadata_file, show_tip_labels, height=None, wid
 def register_callbacks(app):
     @app.callback(
         Output('tree-graph-container', 'children'),
-        [Input('upload-tree', 'contents'),
-         Input('upload-metadata', 'contents'),
-         Input('show-tip-labels', 'value')],
-        [State('upload-tree', 'filename'),
-         State('upload-metadata', 'filename')]
+        [
+            Input('upload-tree', 'contents'),
+            Input('upload-metadata', 'contents'),
+            Input('show-tip-labels', 'value'),
+            Input('color-palette-dropdown', 'value'),
+            Input('color-palette-dropdown-location', 'value')  # ✅ Added location palette input
+        ],
+        [
+            State('upload-tree', 'filename'),
+            State('upload-metadata', 'filename')
+        ]  # ✅ Correct placement inside a separate list
     )
-    def update_tree_tab1(tree_contents, metadata_contents, show_labels, tree_filename, metadata_filename):
+    def update_tree_tab1(tree_contents, metadata_contents, show_labels, selected_palette, selected_location_palette, tree_filename, metadata_filename):
         print("Triggered update_tree_tab1 callback")  # Debug
         if tree_contents and metadata_contents:
             try:
@@ -328,13 +335,26 @@ def register_callbacks(app):
 
                 show_tip_labels = 'SHOW' in show_labels
 
-                # Generate tree plot
-                fig = create_tree_plot(tree_file, metadata_file, show_tip_labels)
+                # Select color palettes dynamically
+                color_palette_dict = {
+                    "Plotly": px.colors.qualitative.Plotly,
+                    "Vivid": px.colors.qualitative.Vivid,
+                    "Bold": px.colors.qualitative.Bold,
+                    "Pastel": px.colors.qualitative.Pastel,
+                    "Dark24": px.colors.qualitative.Dark24
+                }
+                selected_colors = color_palette_dict.get(selected_palette, px.colors.qualitative.Plotly)  # ✅ Fix variable name
+                selected_location_colors = color_palette_dict.get(selected_location_palette, px.colors.qualitative.Plotly)
+
+                # Generate tree plot with selected colors
+                fig = create_tree_plot(tree_file, metadata_file, show_tip_labels, selected_colors, selected_location_colors)
+
                 print("Tree plot successfully created for Tab 1")  # Debug
                 return dcc.Graph(figure=fig)
             except Exception as e:
                 print(f"Error processing tree or metadata files in Tab 1: {str(e)}")  # Debug
                 return html.Div(f"Error: {str(e)}", className="text-danger")
+
         print("Tree or metadata files missing for Tab 1")  # Debug
         return html.Div("Please upload both a tree file and a metadata file.", className="text-warning")
 
@@ -528,18 +548,39 @@ def register_callbacks(app):
     @app.callback(
         Output("download-svg", "data"),
         Input("download-svg-btn", "n_clicks"),
-        [Input('show-tip-labels', 'value')],  # Capture show_tip_labels
+        [State('show-tip-labels', 'value'),
+        State('color-palette-dropdown', 'value'),
+        State('color-palette-dropdown-location', 'value')],  # ✅ Added location palette
         prevent_initial_call=True
     )
-    def export_svg(n_clicks, show_tip_labels):
-        """Efficiently exports the phylogenetic tree as an SVG file."""
-        
-        # Generate the tree figure with respect to the user selection
-        tree_fig = create_tree_plot("uploaded_tree.tree", "uploaded_metadata.tsv", show_tip_labels=show_tip_labels)
+    def export_svg(n_clicks, show_labels, selected_palette, selected_location_palette):
+        """Exports the phylogenetic tree as an SVG file."""
 
-        # Save as SVG in memory
+        # ✅ Ensure `show_tip_labels` is properly assigned
+        show_tip_labels = 'SHOW' in show_labels
+
+        # ✅ Select color palettes dynamically
+        color_palette_dict = {
+            "Plotly": px.colors.qualitative.Plotly,
+            "Vivid": px.colors.qualitative.Vivid,
+            "Bold": px.colors.qualitative.Bold,
+            "Pastel": px.colors.qualitative.Pastel,
+            "Dark24": px.colors.qualitative.Dark24,
+            "Alphabet": px.colors.qualitative.Alphabet
+        }
+        selected_colors = color_palette_dict.get(selected_palette, px.colors.qualitative.Plotly)
+        selected_location_colors = color_palette_dict.get(selected_location_palette, px.colors.qualitative.Plotly)
+
+        # ✅ Generate tree figure
+        tree_fig = create_tree_plot("uploaded_tree.tree", "uploaded_metadata.tsv", show_tip_labels, selected_colors, selected_location_colors)
+
+        # ✅ Save as SVG in memory
         svg_io = io.BytesIO()
-        tree_fig.write_image(svg_io, format="svg", engine="kaleido")  # Explicit engine choice
+        tree_fig.write_image(svg_io, format="svg", engine="kaleido")
+        svg_io.seek(0)
 
         return dcc.send_bytes(svg_io.getvalue(), filename="phylogenetic_tree.svg")
+
+
+
 

@@ -51,7 +51,28 @@ app_layout = dbc.Container([
 
                 dbc.Row([
                     dbc.Col([
-                        html.Label("Select Color Palette:", style={'color': 'white'}),
+                        html.Label("Select Color Palette for Location Labels:", 
+                            style={'color': 'white'}),
+                        dcc.Dropdown(
+                            id='color-palette-dropdown-location',  # New dropdown for location colors
+                            options=[
+                                {'label': 'Plotly', 'value': 'Plotly'},
+                                {'label': 'Vivid', 'value': 'Vivid'},
+                                {'label': 'Bold', 'value': 'Bold'},
+                                {'label': 'Pastel', 'value': 'Pastel'},
+                                {'label': 'Dark24', 'value': 'Dark24'},
+                                {'label': 'Alphabet', 'value': 'Alphabet'}
+                            ],
+                            value='Plotly',  # Default palette
+                            clearable=False,
+                            style={'width': '50%'}
+                        ),
+                    ], 
+                    className="dbc", width=6),
+
+                    dbc.Col([
+                        html.Label("Select Color Palette for MLST Labels:", 
+                            style={'color': 'white'}),
                         dcc.Dropdown(
                             id='color-palette-dropdown',
                             options=[
@@ -59,13 +80,16 @@ app_layout = dbc.Container([
                                 {'label': 'Vivid', 'value': 'Vivid'},
                                 {'label': 'Bold', 'value': 'Bold'},
                                 {'label': 'Pastel', 'value': 'Pastel'},
-                                {'label': 'Dark24', 'value': 'Dark24'}
+                                {'label': 'Dark24', 'value': 'Dark24'},
+                                {'label': 'Alphabet', 'value': 'Alphabet'}
                             ],
                             value='Plotly',  # Default palette
                             clearable=False,
                             style={'width': '50%'}
                         ),
-                    ], width=6),
+                    ], 
+                    className="dbc",
+                    width=6),
 
                 ]),
 
