@@ -49,14 +49,37 @@ app_layout = dbc.Container([
                 ]),
                 
 
-                # html.Hr(),  # Horizontal Line
+                dbc.Row([
+                    dbc.Col([
+                        html.Label("Select Color Palette:", style={'color': 'white'}),
+                        dcc.Dropdown(
+                            id='color-palette-dropdown',
+                            options=[
+                                {'label': 'Plotly', 'value': 'Plotly'},
+                                {'label': 'Vivid', 'value': 'Vivid'},
+                                {'label': 'Bold', 'value': 'Bold'},
+                                {'label': 'Pastel', 'value': 'Pastel'},
+                                {'label': 'Dark24', 'value': 'Dark24'}
+                            ],
+                            value='Plotly',  # Default palette
+                            clearable=False,
+                            style={'width': '50%'}
+                        ),
+                    ], width=6),
 
-                # Row for Phylogenetic Tree and Map
-                # Inside your existing layout where the tree is displayed:
+                ]),
+
+                html.Hr(),  # Horizontal Line
+
+                # Phylogenetic Tree Graph Display
                 dbc.Row([
                     dbc.Col(html.Div(id='tree-graph-container'), width=12),
-                    
-                    # New: Add a "Download as SVG" Button
+                ]),
+
+                html.Br(),
+
+                # Button to Download Tree as SVG
+                dbc.Row([
                     dbc.Col([
                         dbc.Button("Download Tree as SVG", id="download-svg-btn", color="success", className="mt-3"),
                         dcc.Download(id="download-svg")
@@ -64,6 +87,9 @@ app_layout = dbc.Container([
                 ])
             ])
         ]),
+        
+
+
 
         # Tab for Standalone Map
         dcc.Tab(label='Map Visualization', children=[
